@@ -1,15 +1,3 @@
-# Welcome to
-# __________         __    __  .__                               __
-# \______   \_____ _/  |__/  |_|  |   ____   ______ ____ _____  |  | __ ____
-#  |    |  _/\__  \\   __\   __\  | _/ __ \ /  ___//    \\__  \ |  |/ // __ \
-#  |    |   \ / __ \|  |  |  | |  |_\  ___/ \___ \|   |  \/ __ \|    <\  ___/
-#  |________/(______/__|  |__| |____/\_____>______>___|__(______/__|__\\_____>
-#
-# This file can be a nice home for your Battlesnake logic and helper functions.
-#
-# To get you started we've included code to prevent your Battlesnake from moving backwards.
-# For more info see docs.battlesnake.com
-
 import random
 import typing
 
@@ -91,8 +79,25 @@ def move(game_state: typing.Dict) -> typing.Dict:
         if my_head["y"] - 1 == segment["y"] and my_head["x"] == segment["x"]:
             is_move_safe["down"] = False
 
-    # TODO: Step 3 - Prevent your Battlesnake from colliding with other Battlesnakes
-    # opponents = game_state['board']['snakes']
+    # Prevent Battlesnake from colliding with other Battlesnakes
+    opponents = game_state['board']['snakes']
+    
+    # Check each opponent snake
+    for opponent in opponents:
+        # Skip our own snake
+        if opponent["id"] == game_state["you"]["id"]:
+            continue
+            
+        # Check each segment of the opponent's body
+        for segment in opponent["body"]:
+            if my_head["x"] + 1 == segment["x"] and my_head["y"] == segment["y"]:
+                is_move_safe["right"] = False
+            if my_head["x"] - 1 == segment["x"] and my_head["y"] == segment["y"]:
+                is_move_safe["left"] = False
+            if my_head["y"] + 1 == segment["y"] and my_head["x"] == segment["x"]:
+                is_move_safe["up"] = False
+            if my_head["y"] - 1 == segment["y"] and my_head["x"] == segment["x"]:
+                is_move_safe["down"] = False
 
     # Are there any safe moves left?
     safe_moves = []
