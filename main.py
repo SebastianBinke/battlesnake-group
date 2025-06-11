@@ -109,15 +109,83 @@ def move(game_state: typing.Dict) -> typing.Dict:
         print(f"MOVE {game_state['turn']}: No safe moves detected! Moving down")
         return {"move": "down"}
 
-    # Choose a random move from the safe ones
-    next_move = random.choice(safe_moves)
+    # Calculate available space for each safe move
+    best_move = safe_moves[0]
+    max_space = 0
 
-    # TODO: Step 4 - Move towards food instead of random, to regain health and survive longer
-    # food = game_state['board']['food']
+    for move in safe_moves:
+        # Calculate the next position based on the move
+        next_x, next_y = my_head["x"], my_head["y"]
+        if move == "right":
+            next_x += 1
+        elif move == "left":
+            next_x -= 1
+        elif move == "up":
+            next_y += 1
+        elif move == "down":
+            next_y -= 1
 
-    print(f"MOVE {game_state['turn']}: {next_move}")
-    return {"move": next_move}
+        # Get available space from this position
+        available_space = get_available_space(next_x, next_y, game_state)
+        
+        # Update best move if this move leads to more space
+        if available_space > max_space:
+            max_space = available_space
+            best_move = move
 
+    print(f"MOVE {game_state['turn']}: {best_move}")
+    return {"move": best_move}
+ # food = game_state['board']['food']
+# Helper Fuction 
+def get_available_space(start_x, start_y, game_state):
+    to_visit = [(start_x, start_y)]  # Queue of tuples
+    visited = {(start_x, start_y)}  # Set of tuples
+    available_count = 1
+    board_width = game_state['board']['width']
+    board_height = game_state['board']['height']
+
+    while to_visit:  # While there are cells to visit
+        current = to_visit.pop(0)  # Get the first cell from the queue
+        x, y = current  # Unpack coordinates
+        
+        # Check all four neighbors
+        neighbors = [
+            (x+1, y),  # right
+            (x-1, y),  # left
+            (x, y+1),  # up
+            (x, y-1)   # down
+        ]
+        
+        for next_x, next_y in neighbors:
+            # Check if neighbor is within board bounds
+            if 0 <= next_x < board_width and 0 <= next_y < board_height:
+                # Check if neighbor hasn't been visited
+                if (next_x, next_y) not in visited:
+                    # Check if neighbor is safe (not occupied by any snake)
+                    is_safe = True
+                    
+                    # Check against our own body
+                    for segment in game_state["you"]["body"]:
+                        if next_x == segment["x"] and next_y == segment["y"]:
+                            is_safe = False
+                            break
+                    
+                    # Check against opponent bodies
+                    if is_safe:
+                        for opponent in game_state["board"]["snakes"]:
+                            if opponent["id"] == game_state["you"]["id"]:
+                                continue
+                            for segment in opponent["body"]:
+                                if next_x == segment["x"] and next_y == segment["y"]:
+                                    is_safe = False
+                                    break
+                    
+                    if is_safe:
+                        to_visit.append((next_x, next_y))
+                        visited.add((next_x, next_y))
+                        available_count += 1
+    
+    return available_count
 
 # Start server when `python main.py` is run
 if __name__ == "__main__":
