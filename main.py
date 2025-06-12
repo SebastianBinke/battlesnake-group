@@ -19,26 +19,28 @@ def info() -> typing.Dict:
 # start is called when your Battlesnake begins a game
 def start(game_state: typing.Dict):
     print("GAME START")
+    # wir könnten ggf noch spezifische strategien auswählen je nach Kartentyp 
 
 
 # end is called when your Battlesnake finishes a game
 def end(game_state: typing.Dict):
     print("GAME OVER\n")
+    # maybe data collection für improvements 
 
 
-def heuristic(a, b):
-    # manhattan distance
+def manhattanD(a, b):
+    # manhattan distance ist einfach direkter Abstand zwischen zwei Punkten 
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
-def a_star(start, target, game_state):
+def aStar(start, target, game_state):
     board_width = game_state['board']['width']
     board_height = game_state['board']['height']
     
     open_set = [(0, start)]  # priority queue (f_score, node)
     came_from = {}
     g_score = {start: 0}
-    f_score = {start: heuristic(start, target)}
+    f_score = {start: manhattanD(start, target)}
 
     while open_set:
         current_f_score, current_node = heapq.heappop(open_set)
@@ -80,7 +82,7 @@ def a_star(start, target, game_state):
             if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
                 came_from[neighbor] = current_node
                 g_score[neighbor] = tentative_g_score
-                f_score[neighbor] = tentative_g_score + heuristic(neighbor, target)
+                f_score[neighbor] = tentative_g_score + manhattanD(neighbor, target)
                 heapq.heappush(open_set, (f_score[neighbor], neighbor))
 
     return None  # no path found
@@ -166,13 +168,13 @@ def move(game_state: typing.Dict) -> typing.Dict:
 
     for f in food:
         food_coord = (f['x'], f['y'])
-        dist = heuristic(my_head, food_coord)
+        dist = manhattanD(my_head, food_coord)
         if dist < min_distance:
             min_distance = dist
             closest_food = food_coord
 
     if closest_food:
-        next_move = a_star(my_head, closest_food, game_state)
+        next_move = aStar(my_head, closest_food, game_state)
         if next_move:
             x, y = next_move
             if x > my_head[0]:
