@@ -1,5 +1,7 @@
+import heapq
 import random
 import typing
+import math
 
 
 # info is called when you create your Battlesnake on play.battlesnake.com
@@ -27,11 +29,71 @@ def end(game_state: typing.Dict):
     print("GAME OVER\n")
 
 
+def heuristic(a, b):
+    """Manhattan distance heuristic for A*."""
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+
+def a_star(start, target, game_state):
+    """A* pathfinding algorithm."""
+    board_width = game_state['board']['width']
+    board_height = game_state['board']['height']
+    
+    open_set = [(0, start)]  # Priority queue: (f_score, node)
+    came_from = {}
+    g_score = {start: 0}
+    f_score = {start: heuristic(start, target)}
+
+    while open_set:
+        current_f_score, current_node = heapq.heappop(open_set)
+
+        if current_node == target:
+            # Reconstruct path
+            path = []
+            node = target
+            while node in came_from:
+                path.append(node)
+                node = came_from[node]
+            path.append(start)
+            path.reverse()
+            return path[1]  # Return the next move in the path
+
+        x, y = current_node
+        neighbors = [(x+1, y), (x-1, y), (x, y+1), (x, y-1)]
+
+        for next_x, next_y in neighbors:
+            neighbor = (next_x, next_y)
+
+            if not (0 <= next_x < board_width and 0 <= next_y < board_height):
+                continue  # Out of bounds
+
+            # Check for collisions (snakes)
+            is_safe = True
+            for snake in game_state['board']['snakes']:
+                for segment in snake['body']:
+                    if (next_x, next_y) == (segment['x'], segment['y']):
+                        is_safe = False
+                        break
+                if not is_safe:
+                    break
+            if not is_safe:
+                continue
+
+            tentative_g_score = g_score[current_node] + 1
+
+            if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
+                came_from[neighbor] = current_node
+                g_score[neighbor] = tentative_g_score
+                f_score[neighbor] = tentative_g_score + heuristic(neighbor, target)
+                heapq.heappush(open_set, (f_score[neighbor], neighbor))
+
+    return None  # No path found
+
+
 # move is called on every turn and returns your next move
 # Valid moves are "up", "down", "left", or "right"
 # See https://docs.battlesnake.com/api/example-move for available data
 def move(game_state: typing.Dict) -> typing.Dict:
-
     is_move_safe = {"up": True, "down": True, "left": True, "right": True}
 
     # We've included code to prevent your Battlesnake from moving backwards
@@ -99,43 +161,67 @@ def move(game_state: typing.Dict) -> typing.Dict:
             if my_head["y"] - 1 == segment["y"] and my_head["x"] == segment["x"]:
                 is_move_safe["down"] = False
 
-    # Are there any safe moves left?
+    my_head = (game_state["you"]["body"][0]["x"], game_state["you"]["body"][0]["y"])
+
+    # Find closest food using A*
+    food = game_state['board']['food']
+    closest_food = None
+    min_distance = float('inf')
+
+    for f in food:
+        food_coord = (f['x'], f['y'])
+        dist = heuristic(my_head, food_coord)
+        if dist < min_distance:
+            min_distance = dist
+            closest_food = food_coord
+
+    if closest_food:
+        next_move = a_star(my_head, closest_food, game_state)
+        if next_move:
+            x, y = next_move
+            if x > my_head[0]:
+                return {"move": "right"}
+            elif x < my_head[0]:
+                return {"move": "left"}
+            elif y > my_head[1]:
+                return {"move": "up"}
+            elif y < my_head[1]:
+                return {"move": "down"}
+
+    # If no food found or no path, revert to flood fill for safe moves
     safe_moves = []
     for move, isSafe in is_move_safe.items():
         if isSafe:
             safe_moves.append(move)
 
-    if len(safe_moves) == 0:
-        print(f"MOVE {game_state['turn']}: No safe moves detected! Moving down")
-        return {"move": "down"}
+    if safe_moves:
+        # Use flood fill to choose the best safe move
+        best_move = None
+        max_space = -1
+        head_x = game_state["you"]["body"][0]["x"]
+        head_y = game_state["you"]["body"][0]["y"]
 
-    # Calculate available space for each safe move
-    best_move = safe_moves[0]
-    max_space = 0
+        for move in safe_moves:
+            next_x, next_y = head_x, head_y
+            if move == "right":
+                next_x += 1
+            elif move == "left":
+                next_x -= 1
+            elif move == "up":
+                next_y += 1
+            elif move == "down":
+                next_y -= 1
 
-    for move in safe_moves:
-        # Calculate the next position based on the move
-        next_x, next_y = my_head["x"], my_head["y"]
-        if move == "right":
-            next_x += 1
-        elif move == "left":
-            next_x -= 1
-        elif move == "up":
-            next_y += 1
-        elif move == "down":
-            next_y -= 1
+            available_space = get_available_space(next_x, next_y, game_state)
+            if available_space > max_space:
+                max_space = available_space
+                best_move = move
 
-        # Get available space from this position
-        available_space = get_available_space(next_x, next_y, game_state)
-        
-        # Update best move if this move leads to more space
-        if available_space > max_space:
-            max_space = available_space
-            best_move = move
+        return {"move": best_move}
 
-    print(f"MOVE {game_state['turn']}: {best_move}")
-    return {"move": best_move}
- # food = game_state['board']['food']
+    return {"move": "down"}  # Default fallback
+
+# food = game_state['board']['food']
 # Helper Fuction 
 def get_available_space(start_x, start_y, game_state):
     to_visit = [(start_x, start_y)]  # Queue of tuples
