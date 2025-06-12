@@ -1,8 +1,5 @@
 import heapq
-import random
 import typing
-import math
-
 
 # info is called when you create your Battlesnake on play.battlesnake.com
 # and controls your Battlesnake's appearance
@@ -30,16 +27,15 @@ def end(game_state: typing.Dict):
 
 
 def heuristic(a, b):
-    """Manhattan distance heuristic for A*."""
+    # manhattan distance
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
 def a_star(start, target, game_state):
-    """A* pathfinding algorithm."""
     board_width = game_state['board']['width']
     board_height = game_state['board']['height']
     
-    open_set = [(0, start)]  # Priority queue: (f_score, node)
+    open_set = [(0, start)]  # priority queue (f_score, node)
     came_from = {}
     g_score = {start: 0}
     f_score = {start: heuristic(start, target)}
@@ -48,7 +44,7 @@ def a_star(start, target, game_state):
         current_f_score, current_node = heapq.heappop(open_set)
 
         if current_node == target:
-            # Reconstruct path
+            # reconstructing path
             path = []
             node = target
             while node in came_from:
@@ -56,7 +52,7 @@ def a_star(start, target, game_state):
                 node = came_from[node]
             path.append(start)
             path.reverse()
-            return path[1]  # Return the next move in the path
+            return path[1]  # return next move in path 
 
         x, y = current_node
         neighbors = [(x+1, y), (x-1, y), (x, y+1), (x, y-1)]
@@ -65,9 +61,9 @@ def a_star(start, target, game_state):
             neighbor = (next_x, next_y)
 
             if not (0 <= next_x < board_width and 0 <= next_y < board_height):
-                continue  # Out of bounds
+                continue  # out of bounds
 
-            # Check for collisions (snakes)
+            # collision check (snake) 
             is_safe = True
             for snake in game_state['board']['snakes']:
                 for segment in snake['body']:
@@ -87,7 +83,7 @@ def a_star(start, target, game_state):
                 f_score[neighbor] = tentative_g_score + heuristic(neighbor, target)
                 heapq.heappush(open_set, (f_score[neighbor], neighbor))
 
-    return None  # No path found
+    return None  # no path found
 
 
 # move is called on every turn and returns your next move
@@ -117,21 +113,21 @@ def move(game_state: typing.Dict) -> typing.Dict:
     board_height = game_state['board']['height']
 
     # Check if snake is at the edges of the board
-    if my_head["x"] == 0:  # At left edge
+    if my_head["x"] == 0:  # left edge
         is_move_safe["left"] = False
-    if my_head["x"] == board_width - 1:  # At right edge
+    if my_head["x"] == board_width - 1:  # right edge
         is_move_safe["right"] = False
-    if my_head["y"] == 0:  # At bottom edge
+    if my_head["y"] == 0:  #  bottom edge
         is_move_safe["down"] = False
-    if my_head["y"] == board_height - 1:  # At top edge
+    if my_head["y"] == board_height - 1:  # top edge
         is_move_safe["up"] = False
 
-    # Prevent Battlesnake from colliding with itself
+    # prevent self collision 
     my_body = game_state['you']['body']
     
-    # Check each body segment
-    for segment in my_body[1:]:  # Skip the head
-        # Check if moving in any direction would result in collision
+    # check every body segment
+    for segment in my_body[1:]:  # Skip head
+        # ceck possible collisions 
         if my_head["x"] + 1 == segment["x"] and my_head["y"] == segment["y"]:
             is_move_safe["right"] = False
         if my_head["x"] - 1 == segment["x"] and my_head["y"] == segment["y"]:
@@ -144,13 +140,13 @@ def move(game_state: typing.Dict) -> typing.Dict:
     # Prevent Battlesnake from colliding with other Battlesnakes
     opponents = game_state['board']['snakes']
     
-    # Check each opponent snake
+    # check every opponent snake
     for opponent in opponents:
-        # Skip our own snake
+        #skip our snake 
         if opponent["id"] == game_state["you"]["id"]:
             continue
             
-        # Check each segment of the opponent's body
+        # checking every segment of opponent snake
         for segment in opponent["body"]:
             if my_head["x"] + 1 == segment["x"] and my_head["y"] == segment["y"]:
                 is_move_safe["right"] = False
@@ -163,7 +159,7 @@ def move(game_state: typing.Dict) -> typing.Dict:
 
     my_head = (game_state["you"]["body"][0]["x"], game_state["you"]["body"][0]["y"])
 
-    # Find closest food using A*
+    # find closest food using A*
     food = game_state['board']['food']
     closest_food = None
     min_distance = float('inf')
@@ -188,14 +184,14 @@ def move(game_state: typing.Dict) -> typing.Dict:
             elif y < my_head[1]:
                 return {"move": "down"}
 
-    # If no food found or no path, revert to flood fill for safe moves
+    # no food or no path --> floodfill
     safe_moves = []
     for move, isSafe in is_move_safe.items():
         if isSafe:
             safe_moves.append(move)
 
     if safe_moves:
-        # Use flood fill to choose the best safe move
+        #check best possible move via floodfill
         best_move = None
         max_space = -1
         head_x = game_state["you"]["body"][0]["x"]
@@ -212,45 +208,44 @@ def move(game_state: typing.Dict) -> typing.Dict:
             elif move == "down":
                 next_y -= 1
 
-            available_space = get_available_space(next_x, next_y, game_state)
+            available_space = floodfill(next_x, next_y, game_state)
             if available_space > max_space:
                 max_space = available_space
                 best_move = move
 
         return {"move": best_move}
 
-    return {"move": "down"}  # Default fallback
+    return {"move": "down"}
 
 # food = game_state['board']['food']
-# Helper Fuction 
-def get_available_space(start_x, start_y, game_state):
+def floodfill(start_x, start_y, game_state):
     to_visit = [(start_x, start_y)]  # Queue of tuples
     visited = {(start_x, start_y)}  # Set of tuples
     available_count = 1
     board_width = game_state['board']['width']
     board_height = game_state['board']['height']
 
-    while to_visit:  # While there are cells to visit
-        current = to_visit.pop(0)  # Get the first cell from the queue
-        x, y = current  # Unpack coordinates
-        
-        # Check all four neighbors
+    while to_visit:
+        current = to_visit.pop(0)  # returning first cell in queue
+        x, y = current  
+
+        # check neighbors 
         neighbors = [
-            (x+1, y),  # right
-            (x-1, y),  # left
-            (x, y+1),  # up
-            (x, y-1)   # down
+            (x+1, y),
+            (x-1, y),
+            (x, y+1),
+            (x, y-1)
         ]
         
         for next_x, next_y in neighbors:
-            # Check if neighbor is within board bounds
+            # neighbor in bounds? 
             if 0 <= next_x < board_width and 0 <= next_y < board_height:
-                # Check if neighbor hasn't been visited
+                # neighbor visited? 
                 if (next_x, next_y) not in visited:
-                    # Check if neighbor is safe (not occupied by any snake)
+                    # neighbor safe? 
                     is_safe = True
                     
-                    # Check against our own body
+                    # check against own body
                     for segment in game_state["you"]["body"]:
                         if next_x == segment["x"] and next_y == segment["y"]:
                             is_safe = False
