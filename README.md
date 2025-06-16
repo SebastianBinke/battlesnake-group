@@ -2,7 +2,7 @@ Gruppe 28 <br>
 Gruppenmitglieder:
 Fischer Julien <br> 
 Binke Sebastian<br>
-Hauke <br>
+Hoffmann Hauke <br>
 Beese John <br>
 Hieu Kevin <br>
 <br>
