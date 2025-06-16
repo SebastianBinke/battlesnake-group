@@ -3,7 +3,7 @@ Gruppenmitglieder:
 Fischer Julien <br> 
 Binke Sebastian<br>
 Hauke <br>
-John <br>
+Beese John <br>
 Hieu Kevin <br>
 <br>
 
