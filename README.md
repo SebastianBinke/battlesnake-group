@@ -1,3 +1,27 @@
+Gruppe 28 <br>
+Gruppenmitglieder:
+Julian <br> 
+Sebastian <br>
+Hauke <br>
+John <br>
+Hieu Kevin <br>
+<br>
+
+Praxisteil <br>
+Aufgabe 1: <br>
+Aufgabe 2:
+
+<br>
+
+Theorieteil <br>
+Aufgabe 1
+<br> Aufgabe 2
+<br> Aufgabe 3
+<br> Aufgabe 4
+
+
+
+
 # Battlesnake Python Starter Project
 
 An official Battlesnake template written in Python. Get started at [play.battlesnake.com](https://play.battlesnake.com).
