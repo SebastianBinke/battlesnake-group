@@ -1,7 +1,7 @@
 Gruppe 28 <br>
 Gruppenmitglieder:
-Julian <br> 
-Sebastian <br>
+Fischer Julien <br> 
+Binke Sebastian<br>
 Hauke <br>
 John <br>
 Hieu Kevin <br>
