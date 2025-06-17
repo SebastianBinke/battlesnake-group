@@ -1,0 +1,27 @@
+--- später in PDF
+
+Theorieteil
+Aufgabe 1:
+UML Diagramm 
+
+Aufgabe 2:
+Welcher Agententyp?
+
+
+Verwendete Konzepte:
+    Suchalgorithmus (A*)
+        
+
+    Heuristik (Manhattan-Distanz)
+        
+
+    Umweltmodellierung
+        
+
+    Reaktives Verhalten mit Zustand
+        
+
+Aufgabe 3:
+
+
+Aufgabe 4: Umgebungseigenschaften
