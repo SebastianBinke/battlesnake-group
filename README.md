@@ -1,10 +1,10 @@
 Gruppe 28 <br>
 Gruppenmitglieder:
-Fischer Julien <br> 
-Binke Sebastian<br>
-Hoffmann Hauke <br>
-Beese John <br>
-Tran Hieu Kevin Manh - MatrikelNr.: 223201753<br>
+Fischer, Julien <br> 
+Binke, Sebastian<br>
+Hoffmann, Hauke Lars  - Mat.-Nr.: 223201893<br>
+Beese, John Pascal (Mat.-Nr.: 223201167) <br>
+Tran, Hieu Kevin Manh - MatrikelNr.: 223201753<br>
 <br>
 
 Praxisteil <br>
@@ -18,6 +18,7 @@ Aufgabe 1
 <br> Aufgabe 2
 <br> Aufgabe 3
 <br> Aufgabe 4
+<br> siehe Theorieteil.pdf
 
 
 
