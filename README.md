@@ -1,7 +1,7 @@
 Gruppe 28 <br>
-Gruppenmitglieder:
-Fischer, Julien <br> 
-Binke, Sebastian<br>
+Gruppenmitglieder: <br>
+Fischer, Julien - Mat.Nr.: 223200146<br> 
+Binke, Sebastian - Mat.-Nr.: 221202225<br>
 Hoffmann, Hauke Lars  - Mat.-Nr.: 223201893<br>
 Beese, John Pascal (Mat.-Nr.: 223201167) <br>
 Tran, Hieu Kevin Manh - MatrikelNr.: 223201753<br>
