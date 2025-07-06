@@ -37,6 +37,19 @@ def manhattanD(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
+def is_dangerous_adjacent_to_enemy_head(pos, enemy_snakes, my_length):
+        # Check if position is adjacent to enemy head that is >= my length
+        x, y = pos
+        adjacent_positions = [(x+1, y), (x-1, y), (x, y+1), (x, y-1)]
+
+        for enemy in enemy_snakes:
+            if enemy['length'] >= my_length:
+                enemy_head = enemy['head']
+                if enemy_head in adjacent_positions:
+                    return True
+
+        return False
+
 def aStar(start, target, game_state):
     board_width = game_state['board']['width']
     board_height = game_state['board']['height']
@@ -214,15 +227,15 @@ def move(game_state: typing.Dict) -> typing.Dict:
 
     if closest_food:
         next_move = aStar(my_head, closest_food, game_state)
-        if next_move:
+        if next_move and next_move != my_head:
             x, y = next_move
-            if x > my_head[0]:
+            if x > my_head[0] and is_move_safe["right"]:
                 return {"move": "right"}
-            elif x < my_head[0]:
+            elif x < my_head[0] and is_move_safe["left"]:
                 return {"move": "left"}
-            elif y > my_head[1]:
+            elif y > my_head[1] and is_move_safe["up"]:
                 return {"move": "up"}
-            elif y < my_head[1]:
+            elif y < my_head[1] and is_move_safe["down"]:
                 return {"move": "down"}
 
     # no food or no path --> floodfill
@@ -254,8 +267,15 @@ def move(game_state: typing.Dict) -> typing.Dict:
                 max_space = available_space
                 best_move = move
 
-        return {"move": best_move}
+        if best_move:
+            return {"move": best_move}
 
+    # Emergency fallback - find any move that doesn't immediately kill us
+    emergency_moves = ["right", "left", "down", "up"]
+    for move in emergency_moves:
+        if is_move_safe.get(move, False):
+            return {"move": move}
+    #Last resort
     return {"move": "down"}
 
 # food = game_state['board']['food']
