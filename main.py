@@ -5,6 +5,7 @@
 #Tran, Hieu Kevin Manh – Mat.-Nr.: 223201753 
 import heapq
 import typing
+
 # info is called when you create your Battlesnake on play.battlesnake.com
 # and controls your Battlesnake's appearance
 # TIP: If you open your Battlesnake URL in a browser you should see this data
@@ -13,12 +14,12 @@ def info() -> typing.Dict:
 
     return {
         "apiversion": "1",
-        "author": "Killua", 
-        "color": "#1D386B", 
-        "head": "all-seeing", 
-        "tail": "bolt",  
+        "author": "Beese", 
+        "color": "#660066", 
+        "head": "gamer", 
+        "tail": "rbc-necktie",  
     }
-    
+
 
 # start is called when your Battlesnake begins a game
 def start(game_state: typing.Dict):
@@ -37,23 +38,40 @@ def manhattanD(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
+def get_enemy_snakes_info(game_state):
+    # Returns list of enemy snakes with their head positions and lengths
+    my_id = game_state["you"]["id"]
+    enemy_snakes = []
+
+    for snake in game_state['board']['snakes']:
+        if snake['id'] != my_id:
+            enemy_snakes.append({
+                'id': snake['id'],
+                'head': (snake['body'][0]['x'], snake['body'][0]['y']),
+                'length': len(snake['body'])
+            })
+
+    return enemy_snakes
+
+
 def is_dangerous_adjacent_to_enemy_head(pos, enemy_snakes, my_length):
-        # Check if position is adjacent to enemy head that is >= my length
-        x, y = pos
-        adjacent_positions = [(x+1, y), (x-1, y), (x, y+1), (x, y-1)]
+    # Check if position is adjacent to enemy head that is >= my length
+    x, y = pos
+    adjacent_positions = [(x+1, y), (x-1, y), (x, y+1), (x, y-1)]
 
-        for enemy in enemy_snakes:
-            if enemy['length'] >= my_length:
-                enemy_head = enemy['head']
-                if enemy_head in adjacent_positions:
-                    return True
+    for enemy in enemy_snakes:
+        if enemy['length'] >= my_length:
+            enemy_head = enemy['head']
+            if enemy_head in adjacent_positions:
+                return True
 
-        return False
+    return False
+
 
 def aStar(start, target, game_state):
     board_width = game_state['board']['width']
     board_height = game_state['board']['height']
-    
+
     open_set = [(0, start)]  # priority queue (f_score, node)
     came_from = {}
     g_score = {start: 0}
@@ -97,20 +115,20 @@ def aStar(start, target, game_state):
                         )
                         if not will_eat_food:
                             continue  # Skip tail collision check
-                    
+
                     if (next_x, next_y) == (segment['x'], segment['y']):
                         is_safe = False
                         break
                 if not is_safe:
                     break
-            
+
             # Check if position is dangerously adjacent to enemy heads
             if is_safe:
                 enemy_snakes = get_enemy_snakes_info(game_state)
                 my_length = len(game_state['you']['body'])
                 if is_dangerous_adjacent_to_enemy_head(neighbor, enemy_snakes, my_length):
                     is_safe = False
-            
+
             if not is_safe:
                 continue
 
@@ -118,7 +136,7 @@ def aStar(start, target, game_state):
             move_cost = 1
             enemy_snakes = get_enemy_snakes_info(game_state)
             my_length = len(game_state['you']['body'])
-            
+
             # Check if this position is adjacent to any enemy head
             for enemy in enemy_snakes:
                 enemy_head = enemy['head']
@@ -129,7 +147,7 @@ def aStar(start, target, game_state):
                     # If we're shorter or equal, we already avoid it due to safety check above
                     break
 
-            tentative_g_score = g_score[current_node] + 1
+            tentative_g_score = g_score[current_node] + move_cost
 
             if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
                 came_from[neighbor] = current_node
@@ -178,7 +196,7 @@ def move(game_state: typing.Dict) -> typing.Dict:
 
     # prevent self collision 
     my_body = game_state['you']['body']
-    
+
     # check every body segment
     for segment in my_body[1:]:  # Skip head
         # ceck possible collisions 
@@ -193,13 +211,13 @@ def move(game_state: typing.Dict) -> typing.Dict:
 
     # Prevent Battlesnake from colliding with other Battlesnakes
     opponents = game_state['board']['snakes']
-    
+
     # check every opponent snake
     for opponent in opponents:
         #skip our snake 
         if opponent["id"] == game_state["you"]["id"]:
             continue
-            
+
         # checking every segment of opponent snake
         for segment in opponent["body"]:
             if my_head["x"] + 1 == segment["x"] and my_head["y"] == segment["y"]:
@@ -210,6 +228,22 @@ def move(game_state: typing.Dict) -> typing.Dict:
                 is_move_safe["up"] = False
             if my_head["y"] - 1 == segment["y"] and my_head["x"] == segment["x"]:
                 is_move_safe["down"] = False
+
+    # Avoid positions adjacent to enemy heads that are >= our length
+    enemy_snakes = get_enemy_snakes_info(game_state)
+    my_length = len(game_state["you"]["body"])
+
+    # Check each move direction for dangerous adjacency to enemy heads
+    potential_positions = {
+        "right": (my_head["x"] + 1, my_head["y"]),
+        "left": (my_head["x"] - 1, my_head["y"]),
+        "up": (my_head["x"], my_head["y"] + 1),
+        "down": (my_head["x"], my_head["y"] - 1)
+    }
+
+    for direction, pos in potential_positions.items():
+        if is_dangerous_adjacent_to_enemy_head(pos, enemy_snakes, my_length):
+            is_move_safe[direction] = False
 
     my_head = (game_state["you"]["body"][0]["x"], game_state["you"]["body"][0]["y"])
 
@@ -275,7 +309,8 @@ def move(game_state: typing.Dict) -> typing.Dict:
     for move in emergency_moves:
         if is_move_safe.get(move, False):
             return {"move": move}
-    #Last resort
+
+    # Last resort
     return {"move": "down"}
 
 # food = game_state['board']['food']
@@ -297,7 +332,7 @@ def floodfill(start_x, start_y, game_state):
             (x, y+1),
             (x, y-1)
         ]
-        
+
         for next_x, next_y in neighbors:
             # neighbor in bounds? 
             if 0 <= next_x < board_width and 0 <= next_y < board_height:
@@ -305,13 +340,13 @@ def floodfill(start_x, start_y, game_state):
                 if (next_x, next_y) not in visited:
                     # neighbor safe? 
                     is_safe = True
-                    
+
                     # check against own body
                     for segment in game_state["you"]["body"]:
                         if next_x == segment["x"] and next_y == segment["y"]:
                             is_safe = False
                             break
-                    
+
                     # Check against opponent bodies
                     if is_safe:
                         for opponent in game_state["board"]["snakes"]:
@@ -321,12 +356,12 @@ def floodfill(start_x, start_y, game_state):
                                 if next_x == segment["x"] and next_y == segment["y"]:
                                     is_safe = False
                                     break
-                    
+
                     if is_safe:
                         to_visit.append((next_x, next_y))
                         visited.add((next_x, next_y))
                         available_count += 1
-    
+
     return available_count
 
 # Start server when `python main.py` is run
