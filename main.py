@@ -1,6 +1,10 @@
+#Fischer, Julien - Mat.-Nr.: 223200146
+#Binke, Sebastian - Mat.-Nr.: 221202225
+#Hoffmann, Hauke Lars - Mat.-Nr.: 223201893 
+#Beese, John Pascal - Mat.-Nr.: 223201167  
+#Tran, Hieu Kevin Manh – Mat.-Nr.: 223201753 
 import heapq
 import typing
-
 # info is called when you create your Battlesnake on play.battlesnake.com
 # and controls your Battlesnake's appearance
 # TIP: If you open your Battlesnake URL in a browser you should see this data
