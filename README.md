@@ -8,8 +8,8 @@ Tran, Hieu Kevin Manh - MatrikelNr.: 223201753<br>
 <br>
 
 Praxisteil <br>
-Aufgabe 1: <br>
-Aufgabe 2:
+Aufgabe 1: main.py<br>
+Aufgabe 2: main.py
 
 <br>
 
@@ -18,12 +18,12 @@ Aufgabe 1
 <br> Aufgabe 2
 <br> Aufgabe 3
 <br> Aufgabe 4
-<br> siehe Theorieteil.pdf
+<br> alle Aufgaben sind enthalten in Theorieteil.pdf
 
 
 
 
-# Battlesnake Python Starter Project
+# Based On The Official Battlesnake Python Starter Project
 
 An official Battlesnake template written in Python. Get started at [play.battlesnake.com](https://play.battlesnake.com).
 
