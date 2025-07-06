@@ -69,17 +69,52 @@ def aStar(start, target, game_state):
             if not (0 <= next_x < board_width and 0 <= next_y < board_height):
                 continue  # out of bounds
 
-            # collision check (snake) 
+            # collision check with tail avoidance
             is_safe = True
             for snake in game_state['board']['snakes']:
-                for segment in snake['body']:
+                snake_body = snake['body']
+                for i, segment in enumerate(snake_body):
+                    # Skip the tail if the snake won't grow (no food eaten)
+                    # The tail will move out of the way on the next turn
+                    if i == len(snake_body) - 1 and snake['id'] == game_state['you']['id']:
+                        # Check if we're about to eat food - if so, tail won't move
+                        will_eat_food = any(
+                            target == (food['x'], food['y']) 
+                            for food in game_state['board']['food']
+                        )
+                        if not will_eat_food:
+                            continue  # Skip tail collision check
+                    
                     if (next_x, next_y) == (segment['x'], segment['y']):
                         is_safe = False
                         break
                 if not is_safe:
                     break
+            
+            # Check if position is dangerously adjacent to enemy heads
+            if is_safe:
+                enemy_snakes = get_enemy_snakes_info(game_state)
+                my_length = len(game_state['you']['body'])
+                if is_dangerous_adjacent_to_enemy_head(neighbor, enemy_snakes, my_length):
+                    is_safe = False
+            
             if not is_safe:
                 continue
+
+            # Calculate move cost - prefer attacking when we're longer
+            move_cost = 1
+            enemy_snakes = get_enemy_snakes_info(game_state)
+            my_length = len(game_state['you']['body'])
+            
+            # Check if this position is adjacent to any enemy head
+            for enemy in enemy_snakes:
+                enemy_head = enemy['head']
+                if manhattanD(neighbor, enemy_head) == 1:  # Adjacent to enemy head
+                    if my_length > enemy['length']:
+                        # We're longer - reduce cost to prefer this move (aggressive)
+                        move_cost = 0.5
+                    # If we're shorter or equal, we already avoid it due to safety check above
+                    break
 
             tentative_g_score = g_score[current_node] + 1
 
