@@ -14,7 +14,7 @@ def info() -> typing.Dict:
 
     return {
         "apiversion": "1",
-        "author": "Beese", 
+        "author": "group28", 
         "color": "#660066", 
         "head": "gamer", 
         "tail": "rbc-necktie",  
@@ -30,7 +30,7 @@ def start(game_state: typing.Dict):
 # end is called when your Battlesnake finishes a game
 def end(game_state: typing.Dict):
     print("GAME OVER\n")
-    # maybe data collection für improvements 
+    # we can later think about data collection für improvements 
 
 
 def manhattanD(a, b):
@@ -185,13 +185,13 @@ def move(game_state: typing.Dict) -> typing.Dict:
     board_height = game_state['board']['height']
 
     # Check if snake is at the edges of the board
-    if my_head["x"] == 0:  # left edge
+    if my_head["x"] == 0:
         is_move_safe["left"] = False
-    if my_head["x"] == board_width - 1:  # right edge
+    if my_head["x"] == board_width - 1:
         is_move_safe["right"] = False
-    if my_head["y"] == 0:  #  bottom edge
+    if my_head["y"] == 0:
         is_move_safe["down"] = False
-    if my_head["y"] == board_height - 1:  # top edge
+    if my_head["y"] == board_height - 1:
         is_move_safe["up"] = False
 
     # prevent self collision 
